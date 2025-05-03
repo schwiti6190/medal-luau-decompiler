@@ -4,6 +4,7 @@ use nom_leb128::leb128_usize;
 pub mod bytecode;
 pub mod chunk;
 pub mod constant;
+pub mod variable;
 pub mod function;
 mod list;
 

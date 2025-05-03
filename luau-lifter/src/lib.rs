@@ -136,8 +136,18 @@ pub fn decompile_bytecode(bytecode: &[u8], encode_key: u8) -> String {
             let main = ByAddress(main);
             upvalues.remove(&main);
             let mut body = Arc::try_unwrap(main.0).unwrap().into_inner().body;
+            for up in &upvalues {
+                let func = up.0.lock();
+                let val = up.1;
+                let mut i = 0;
+                for v in val {
+                    let mut lock = v.0 .0.lock();
+                    lock.0 = Some(func.up_value_names[i].clone());
+                    i += 1;
+                }
+            }
             link_upvalues(&mut body, &mut upvalues);
-            name_locals(&mut body, true);
+            name_locals(&mut body, false);
             body.to_string()
         }
     }
@@ -208,6 +218,9 @@ fn decompile_function(
     .destruct();
 
     let params = std::mem::take(&mut function.parameters);
+    let param_names = std::mem::take(&mut function.parameter_names);
+    let up_value_names = std::mem::take(&mut function.up_value_names);
+    let variables = std::mem::take(&mut function.local_variables);
     let is_variadic = function.is_variadic;
     let block = Arc::new(restructure::lift(function).into());
     LocalDeclarer::default().declare_locals(
@@ -221,6 +234,9 @@ fn decompile_function(
         ast_function.body = Arc::try_unwrap(block).unwrap().into_inner();
         ast_function.parameters = params;
         ast_function.is_variadic = is_variadic;
+        ast_function.parameter_names = param_names;
+        ast_function.up_value_names = up_value_names;
+        ast_function.local_variables = variables;
     }
     (ByAddress(ast_function), upvalues_in)
 }
@@ -245,7 +261,8 @@ fn link_upvalues(
                             ast::Upvalue::Copy(l) | ast::Upvalue::Ref(l) => l,
                         }))
                 {
-                    // println!("{} -> {}", old, new);
+                    let mut lock = new.0 .0.lock();
+                    lock.0 = old.0.lock().0.clone();
                     local_map.insert(old.clone(), new.clone());
                 }
                 link_upvalues(&mut function.body, upvalues);

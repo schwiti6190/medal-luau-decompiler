@@ -279,8 +279,11 @@ impl<'a, W: fmt::Write> Formatter<'a, W> {
         parentheses(self, binary.right_group(), &binary.right)
     }
 
-    fn format_closure_parameters(&mut self, closure: &Closure) -> fmt::Result {
-        let function = closure.function.lock();
+    fn format_closure_parameters(&mut self, closure: &Closure, has_self: bool) -> fmt::Result {
+        let mut function = closure.function.lock();
+        if has_self{
+            function.parameters.remove(0);
+        }
         write!(
             self.output,
             "{}",
@@ -341,15 +344,26 @@ impl<'a, W: fmt::Write> Formatter<'a, W> {
 
     pub(crate) fn format_closure(&mut self, closure: &Closure) -> fmt::Result {
         write!(self.output, "function(")?;
-        self.format_closure_parameters(closure)?;
+        self.format_closure_parameters(closure, false)?;
         write!(self.output, ")")?;
         self.format_closure_body(closure)?;
         write!(self.output, "end")
     }
 
     fn format_named_function(&mut self, name: &LValue, closure: &Closure) -> fmt::Result {
-        write!(self.output, "function {}(", name)?;
-        self.format_closure_parameters(closure)?;
+        let f = closure.function.lock().parameter_names.clone();
+        let mut has_self = false;
+        for v in f{
+            if v == "self"{
+                has_self = true;
+            }
+        }
+        if has_self {
+            write!(self.output, "function {}(", str::replace(&name.to_string(), ".", ":"))?;
+        }else{
+            write!(self.output, "function {}(", name)?;
+        }
+        self.format_closure_parameters(closure, has_self)?;
         write!(self.output, ")")?;
         self.format_closure_body(closure)?;
         write!(self.output, "end")

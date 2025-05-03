@@ -7,4 +7,5 @@ fn main() {
         .unwrap_or(1);
     let bytecode = std::fs::read(file_name).expect("failed to read file");
     println!("{}", luau_lifter::decompile_bytecode(&bytecode, key));
+    // luau_lifter::decompile_bytecode(&bytecode, key);
 }

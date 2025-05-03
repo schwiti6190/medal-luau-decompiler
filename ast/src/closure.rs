@@ -7,7 +7,7 @@ use triomphe::Arc;
 use crate::{
     formatter::Formatter,
     type_system::{Infer, TypeSystem},
-    Block, Literal, LocalRw, RcLocal, Reduce, SideEffects, Traverse, Type,
+    Block, Literal, LocalRw, RcLocal, Reduce, SideEffects, Traverse, Type, Variable
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -22,12 +22,15 @@ pub struct Function {
     pub parameters: Vec<RcLocal>,
     pub is_variadic: bool,
     pub body: Block,
+    pub parameter_names: Vec<String>,
+    pub up_value_names: Vec<String>,
+    pub local_variables: Vec<Variable>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Closure {
     pub function: ByAddress<Arc<Mutex<Function>>>,
-    pub upvalues: Vec<Upvalue>,
+    pub upvalues: Vec<Upvalue>
 }
 
 impl Reduce for Closure {

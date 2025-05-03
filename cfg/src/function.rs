@@ -1,4 +1,4 @@
-use ast::{LocalRw, RcLocal};
+use ast::{LocalRw, RcLocal, Variable};
 use contracts::requires;
 
 use petgraph::{
@@ -17,6 +17,9 @@ pub struct Function {
     pub is_variadic: bool,
     graph: StableDiGraph<ast::Block, BlockEdge>,
     entry: Option<NodeIndex>,
+    pub local_variables: Vec<Variable>,
+    pub up_value_names : Vec<String>,
+    pub parameter_names : Vec<String>,
 }
 
 impl Function {
@@ -28,6 +31,9 @@ impl Function {
             is_variadic: false,
             graph: StableDiGraph::new(),
             entry: None,
+            local_variables: Vec::new(),
+            up_value_names: Vec::new(),
+            parameter_names: Vec::new(),
         }
     }
 

@@ -35,8 +35,15 @@ impl Namer {
             statement.post_traverse_values(&mut |value| -> Option<()> {
                 if let itertools::Either::Right(RValue::Closure(closure)) = value {
                     let mut function = closure.function.lock();
+                    let mut i= 0;
                     for param in &function.parameters {
-                        self.name_local("p", param);
+                        let mut lock = param.0 .0.lock();
+                        // if (i < function.parameter_names.len()){
+                        lock.0 = Some(function.parameter_names[i].clone());
+                        // }else{
+                        //     println!("Failed: {:?}", function);   
+                        // } 
+                        i += 1;
                     }
                     self.name_locals(&mut function.body);
                 };

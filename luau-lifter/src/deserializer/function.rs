@@ -9,6 +9,7 @@ use nom_leb128::leb128_usize;
 
 use super::{
     constant::Constant,
+    variable::Variable,
     list::{parse_list, parse_list_len},
 };
 
@@ -29,6 +30,8 @@ pub struct Function {
     pub line_gap_log2: Option<u8>,
     pub line_info_delta: Option<Vec<u8>>,
     pub abs_line_info_delta: Option<Vec<u32>>,
+    pub local_variables: Option<Vec<Variable>>,
+    pub up_values: Option<Vec<usize>>
 }
 
 impl Function {
@@ -158,22 +161,20 @@ impl Function {
                 (input, Some(abs_line_info_delta))
             }
         };
-        let input = match le_u8(input)? {
-            (input, 0) => input,
+        let (input, local_variables, up_values) = match le_u8(input)? {
+            (input, 0) => (input, None, None),
             (input, _) => {
                 // panic!("we have debug info");
-                let (mut input, num_locvars) = leb128_usize(input)?;
-                for _ in 0..num_locvars {
-                    (input, _) = leb128_usize(input)?;
-                    (input, _) = leb128_usize(input)?;
-                    (input, _) = leb128_usize(input)?;
-                    (input, _) = le_u8(input)?;
-                }
-                let (mut input, num_upvalues) = leb128_usize(input)?;
-                for _ in 0..num_upvalues {
-                    (input, _) = leb128_usize(input)?;
-                }
-                input
+                let (input, local_variables) = parse_list(input, Variable::parse)?;
+                // let (mut input, num_locvars) = leb128_usize(input)?;
+                // for _ in 0..num_locvars {
+                //     (input, _) = leb128_usize(input)?;
+                //     (input, _) = leb128_usize(input)?;
+                //     (input, _) = leb128_usize(input)?;
+                //     (input, _) = le_u8(input)?;
+                // }
+                let (input, up_values) = parse_list(input, leb128_usize)?;
+                (input, Some(local_variables), Some(up_values))
             }
         };
         Ok((
@@ -191,6 +192,8 @@ impl Function {
                 line_gap_log2,
                 line_info_delta,
                 abs_line_info_delta,
+                local_variables,
+                up_values
             },
         ))
     }

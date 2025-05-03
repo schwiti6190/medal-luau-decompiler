@@ -29,6 +29,14 @@ impl fmt::Display for Local {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Variable {
+    pub name : String,
+    pub scope_a : usize,
+    pub scope_b : usize,
+    pub register : u8,
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RcLocal(pub ByAddress<Arc<Mutex<Local>>>);
 
 impl Infer for RcLocal {
