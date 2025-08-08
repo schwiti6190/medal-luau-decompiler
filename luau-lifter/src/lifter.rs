@@ -18,7 +18,7 @@ use super::{
     instruction::Instruction,
     op_code::OpCode,
 };
-use ast::{self};
+use ast::{self, RcLocal, Local};
 use cfg::{
     block::{BlockEdge, BranchType},
     function::Function,
@@ -95,8 +95,9 @@ impl<'a> Lifter<'a> {
         for _ in 0..self.function_list[self.function.id].num_upvalues {
             self.upvalues.push(ast::RcLocal::default());
         }
+        
         for i in 0..self.function_list[self.function.id].num_parameters {
-            let parameter = ast::RcLocal::default();
+            let mut parameter = ast::RcLocal::default();
             self.function.parameters.push(parameter.clone());
             self.register_map.insert(i as usize, parameter);
         }
@@ -146,7 +147,10 @@ impl<'a> Lifter<'a> {
                 },
             _ => ()
         } 
-    
+        self.function.line_info.line_defined = self.function_list[self.function.id].line_defined;
+        self.function.line_info.line_gap_log2 = self.function_list[self.function.id].line_gap_log2;
+        self.function.line_info.line_info_abs = self.function_list[self.function.id].abs_line_info_delta.clone();
+        self.function.line_info.line_info_delta = self.function_list[self.function.id].line_info_delta.clone();
 
         self.function.is_variadic = self.function_list[self.function.id].is_vararg;
 
@@ -1349,7 +1353,8 @@ impl<'a> Lifter<'a> {
     }
 
     fn register(&mut self, index: usize, scope : usize) -> ast::RcLocal {
-        let r = self.register_map.entry(index).or_default();
+        let r = self.register_map.entry(index).or_insert(
+            RcLocal::new(Local::default(), index, scope));
         for v in self.function.local_variables.clone() {
             if (v.register as usize != index){
                 continue;

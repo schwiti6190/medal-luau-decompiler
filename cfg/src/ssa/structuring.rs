@@ -859,12 +859,14 @@ fn try_remove_unnecessary_condition(function: &mut Function, node: NodeIndex) ->
             .into_if()
             .unwrap()
             .condition;
+        let mut left = ast::RcLocal::default();
+        left.1 = 99;
         let new_stat = match cond {
             ast::RValue::Call(call) => Some(call.into()),
             ast::RValue::MethodCall(method_call) => Some(method_call.into()),
             cond if cond.has_side_effects() => Some(
                 ast::Assign {
-                    left: vec![ast::RcLocal::default().into()],
+                    left: vec![left.into()],
                     right: vec![cond],
                     prefix: true,
                     parallel: false,

@@ -23,7 +23,7 @@ impl Namer {
                     } else {
                         ""
                     };
-                lock.0 = Some(format!("{}{}_", prefix, self.counter));
+                lock.0 = Some(format!("{}{}_[reg:{},scope:{}]", prefix, self.counter, local.1, local.2));
                 self.counter += 1;
             }
         }

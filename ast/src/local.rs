@@ -36,8 +36,16 @@ pub struct Variable {
     pub register : u8,
 }
 
+impl Display for Variable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} = {{{}-{}|{}}}", 
+            self.name, self.scope_a, self.scope_b, self.register)
+    }
+}
+
+
 #[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct RcLocal(pub ByAddress<Arc<Mutex<Local>>>);
+pub struct RcLocal(pub ByAddress<Arc<Mutex<Local>>>, pub usize, pub usize);
 
 impl Infer for RcLocal {
     fn infer<'a: 'b, 'b>(&'a mut self, system: &mut TypeSystem<'b>) -> Type {
@@ -63,8 +71,8 @@ impl SideEffects for RcLocal {}
 impl Traverse for RcLocal {}
 
 impl RcLocal {
-    pub fn new(local: Local) -> Self {
-        Self(ByAddress(Arc::new(Mutex::new(local))))
+    pub fn new(local: Local, reg: usize, scope: usize) -> Self {
+        Self(ByAddress(Arc::new(Mutex::new(local))), reg, scope)
     }
 }
 

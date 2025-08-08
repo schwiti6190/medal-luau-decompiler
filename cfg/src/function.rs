@@ -10,6 +10,25 @@ use petgraph::{
 use crate::block::{BlockEdge, BranchType};
 
 #[derive(Debug, Clone, Default)]
+pub struct FunctionLineInfo {
+    pub line_defined : usize,
+    pub line_gap_log2 : Option<u8>,
+    pub line_info_delta : Option<Vec<u8>>,
+    pub line_info_abs : Option<Vec<u32>>,
+}
+
+impl FunctionLineInfo {
+    pub fn new() -> Self {
+        Self {
+            line_defined:0,
+            line_gap_log2:Some(0),
+            line_info_abs:Some(Vec::new()),
+            line_info_delta:Some(Vec::new()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct Function {
     pub id: usize,
     pub name: Option<String>,
@@ -20,7 +39,10 @@ pub struct Function {
     pub local_variables: Vec<Variable>,
     pub up_value_names : Vec<String>,
     pub parameter_names : Vec<String>,
+    pub line_info : FunctionLineInfo,
 }
+
+
 
 impl Function {
     pub fn new(id: usize) -> Self {
@@ -34,6 +56,7 @@ impl Function {
             local_variables: Vec::new(),
             up_value_names: Vec::new(),
             parameter_names: Vec::new(),
+            line_info: FunctionLineInfo::new(),
         }
     }
 

@@ -313,25 +313,7 @@ impl<'a, W: fmt::Write> Formatter<'a, W> {
             //     self.indent()?;
             //     writeln!(self.output, "-- line defined: {}", closure.line_defined.as_ref().unwrap())?;
             // }
-            if !closure.upvalues.is_empty() {
-                self.indent()?;
-                write!(self.output, "-- upvalues: ")?;
-                let mut it = closure.upvalues.iter().peekable();
-                while let Some(uv) = it.next() {
-                    match uv {
-                        crate::Upvalue::Copy(copy) => {
-                            write!(self.output, "(copy) {}", copy)?;
-                        }
-                        crate::Upvalue::Ref(lref) => {
-                            write!(self.output, "(ref) {}", lref)?;
-                        }
-                    }
-                    if it.peek().is_some() {
-                        write!(self.output, ", ")?;
-                    }
-                }
-                writeln!(self.output)?;
-            }
+        
             self.indentation_level -= 1;
 
             self.format_block(&function.body)?;
@@ -342,12 +324,31 @@ impl<'a, W: fmt::Write> Formatter<'a, W> {
         }
     }
 
+    fn format_vars(&mut self, closure: &Closure) -> fmt::Result {
+        let f = closure.function.lock().local_variables.clone();
+        let params = closure.function.lock().parameter_names.clone();
+        let mut var_found = false;
+        for v in f.iter().sorted_by(|a,b| a.scope_a.cmp(&b.scope_a)){
+            if params.contains(&v.name){
+                continue;
+            }
+            if !var_found{
+                writeln!(self.output, "\n-- Vars =>");
+                var_found = true;
+            }
+            writeln!(self.output, "-- \t{}", v);
+        }
+        write!(self.output, "")
+    }
+
     pub(crate) fn format_closure(&mut self, closure: &Closure) -> fmt::Result {
+        self.format_vars(closure);
         write!(self.output, "function(")?;
         self.format_closure_parameters(closure, false)?;
         write!(self.output, ")")?;
         self.format_closure_body(closure)?;
-        write!(self.output, "end")
+        write!(self.output, "end");
+        writeln!(self.output, "")
     }
 
     fn format_named_function(&mut self, name: &LValue, closure: &Closure) -> fmt::Result {
@@ -358,6 +359,7 @@ impl<'a, W: fmt::Write> Formatter<'a, W> {
                 has_self = true;
             }
         }
+        self.format_vars(closure);
         if has_self {
             write!(self.output, "function {}(", str::replace(&name.to_string(), ".", ":"))?;
         }else{
@@ -366,7 +368,8 @@ impl<'a, W: fmt::Write> Formatter<'a, W> {
         self.format_closure_parameters(closure, has_self)?;
         write!(self.output, ")")?;
         self.format_closure_body(closure)?;
-        write!(self.output, "end")
+        write!(self.output, "end");
+        writeln!(self.output, "")
     }
 
     fn format_rvalue(&mut self, rvalue: &RValue) -> fmt::Result {
