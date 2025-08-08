@@ -885,8 +885,8 @@ function VehicleMotor:update(dt)
 			v134_[reg:5,scope:0] = (self.motorRotSpeed - v105_[reg:3,scope:2]) / (g_physicsDtNonInterpolated * 0.001)
 			v135_[reg:6,scope:2] = (self.differentialRotSpeed - v106_[reg:4,scope:3]) / (g_physicsDtNonInterpolated * 0.001)
 		else
-			v135_[reg:6,scope:2] = 0
 			v134_[reg:5,scope:0] = 0
+			v135_[reg:6,scope:2] = 0
 		end
 		self.motorRotAcceleration = v134_[reg:5,scope:0]
 		self.motorRotAccelerationSmoothed = 0.8 * self.motorRotAccelerationSmoothed + 0.2 * v134_[reg:5,scope:0]
@@ -1099,11 +1099,11 @@ function VehicleMotor:updateStartGearValues(dt)
 		if v189_[reg:17,scope:14] ~= self.vehicle and (v189_[reg:17,scope:14].spec_wheels ~= nil and #v189_[reg:17,scope:14].spec_wheels.wheels > 0) then
 			local v190_[reg:19,scope:1] = v189_[reg:17,scope:14]:getTotalMass(true) / v176_[reg:3,scope:4]
 			local v191_[reg:20,scope:0], v192_[reg:21,scope:20], v193_[reg:22,scope:18] = v189_[reg:17,scope:14]:getOverallCenterOfMass()
-			v185_[reg:0,scope:0] = v185_[reg:0,scope:0] + v191_[reg:20,scope:0] * v190_[reg:19,scope:1]
-			v186_[reg:0,scope:0] = v186_[reg:0,scope:0] + v192_[reg:21,scope:20] * v190_[reg:19,scope:1]
-			v183_[reg:0,scope:0] = v183_[reg:0,scope:0] + v193_[reg:22,scope:18] * v190_[reg:19,scope:1]
+			v184_[reg:0,scope:0] = v184_[reg:0,scope:0] + v191_[reg:20,scope:0] * v190_[reg:19,scope:1]
+			v185_[reg:0,scope:0] = v185_[reg:0,scope:0] + v192_[reg:21,scope:20] * v190_[reg:19,scope:1]
+			v186_[reg:0,scope:0] = v186_[reg:0,scope:0] + v193_[reg:22,scope:18] * v190_[reg:19,scope:1]
 			local v194_[reg:23,scope:19], v195_[reg:24,scope:23], v196_[reg:25,scope:22] = v189_[reg:17,scope:14]:getVehicleWorldDirection()
-			v184_[reg:0,scope:0] = v184_[reg:0,scope:0] + v194_[reg:23,scope:19] * v190_[reg:19,scope:1]
+			v183_[reg:0,scope:0] = v183_[reg:0,scope:0] + v194_[reg:23,scope:19] * v190_[reg:19,scope:1]
 			v188_[reg:0,scope:0] = v188_[reg:0,scope:0] + v195_[reg:24,scope:23] * v190_[reg:19,scope:1]
 			v187_[reg:0,scope:0] = v187_[reg:0,scope:0] + v196_[reg:25,scope:22] * v190_[reg:19,scope:1]
 		end
@@ -1111,15 +1111,15 @@ function VehicleMotor:updateStartGearValues(dt)
 	local v197_[reg:13,scope:0], v198_[reg:14,scope:16], v199_[reg:15,scope:5] = self.vehicle:getVehicleWorldDirection()
 	if VehicleDebug.state == VehicleDebug.DEBUG_TRANSMISSION then
 		local v200_[reg:16,scope:10], v201_[reg:17,scope:14], v202_[reg:18,scope:5] = getWorldTranslation(self.vehicle.components[1].node)
-		DebugGizmo.renderAtPosition(v185_[reg:0,scope:0], v186_[reg:0,scope:0], v183_[reg:0,scope:0], v184_[reg:0,scope:0], v188_[reg:0,scope:0], v187_[reg:0,scope:0], 0, 1, 0, "TOOLS DIR")
+		DebugGizmo.renderAtPosition(v184_[reg:0,scope:0], v185_[reg:0,scope:0], v186_[reg:0,scope:0], v183_[reg:0,scope:0], v188_[reg:0,scope:0], v187_[reg:0,scope:0], 0, 1, 0, "TOOLS DIR")
 		DebugGizmo.renderAtPosition(v200_[reg:16,scope:10], v201_[reg:17,scope:14], v202_[reg:18,scope:5], v197_[reg:13,scope:0], v198_[reg:14,scope:16], v199_[reg:15,scope:5], 0, 1, 0, "VEHICLE DIR")
 	end
 	local v203_[reg:18,scope:5], v204_[reg:18,scope:5]
-	if v184_[reg:0,scope:0] == 0 and (v188_[reg:0,scope:0] == 0 and v187_[reg:0,scope:0] == 0) then
+	if v183_[reg:0,scope:0] == 0 and (v188_[reg:0,scope:0] == 0 and v187_[reg:0,scope:0] == 0) then
 		v203_[reg:18,scope:5] = 0
 		v204_[reg:18,scope:5] = 0
 	else
-		local v205_[reg:20,scope:0] = v184_[reg:0,scope:0] - v197_[reg:13,scope:0]
+		local v205_[reg:20,scope:0] = v183_[reg:0,scope:0] - v197_[reg:13,scope:0]
 		local v206_[reg:19,scope:1] = math.abs(v205_[reg:20,scope:0])
 		local v207_[reg:21,scope:20] = v187_[reg:0,scope:0] - v199_[reg:15,scope:5]
 		local v208_[reg:20,scope:0] = math.abs(v207_[reg:21,scope:20])
@@ -1195,8 +1195,8 @@ function VehicleMotor:getBestStartGear(gears)
 						end
 					end
 					if v228_[reg:16,scope:1] < v216_[reg:3,scope:0] then
-						v218_[reg:5,scope:0] = v225_[reg:11,scope:0]
 						v217_[reg:4,scope:0] = v227_[reg:15,scope:3]
+						v218_[reg:5,scope:0] = v225_[reg:11,scope:0]
 						v216_[reg:3,scope:0] = v228_[reg:16,scope:1]
 					end
 				end
@@ -1279,8 +1279,8 @@ function VehicleMotor:getBestGearRatio(wheelSpeedRpm, minRatio, maxRatio, accSaf
 		local v248_[reg:20,scope:0] = self.minRpm
 		local v249_[reg:13,scope:0] = self:getTorqueCurveValue((math.max(v247_[reg:12,scope:4], v248_[reg:20,scope:0]))) * v247_[reg:12,scope:4] * 3.141592653589793 / 30
 		if v245_[reg:0,scope:0] < v249_[reg:13,scope:0] then
-			minRatio = v246_[reg:11,scope:0]
 			v245_[reg:0,scope:0] = v249_[reg:13,scope:0]
+			minRatio = v246_[reg:11,scope:0]
 		end
 		if requiredMotorPower <= v249_[reg:13,scope:0] then
 			break
@@ -1469,11 +1469,11 @@ function VehicleMotor:findGearChangeTargetGearPrediction(curGear, gears, gearSig
 					end
 					if math.abs(acceleratorPedal) < 0.0001 and (v259_[reg:14,scope:0] - v285_[reg:0,scope:0]) / (v253_[reg:10,scope:11] - v285_[reg:0,scope:0]) > 0.25 then
 						if v280_[reg:22,scope:0] < curGear then
-							v301_[reg:31,scope:6] = 0
 							v288_[reg:29,scope:1] = 0
+							v301_[reg:31,scope:6] = 0
 						elseif v280_[reg:22,scope:0] == curGear then
-							v301_[reg:31,scope:6] = 1
 							v288_[reg:29,scope:1] = 1
+							v301_[reg:31,scope:6] = 1
 						end
 					end
 					if curGear < v280_[reg:22,scope:0] and v284_[reg:25,scope:0] < self.startGearThreshold then
@@ -1758,12 +1758,12 @@ function VehicleMotor:updateGear(acceleratorPedal, brakePedal, dt)
 					end
 				end
 			else
-				v319_[reg:0,scope:0] = acceleratorPedal
 				v318_[reg:11,scope:0] = v317_[reg:6,scope:1]
+				v319_[reg:0,scope:0] = acceleratorPedal
 			end
 		else
-			v319_[reg:0,scope:0] = acceleratorPedal
 			v318_[reg:11,scope:0] = v317_[reg:6,scope:1]
+			v319_[reg:0,scope:0] = acceleratorPedal
 		end
 		if v318_[reg:11,scope:0] == self.gear then
 			acceleratorPedal = v319_[reg:0,scope:0]
